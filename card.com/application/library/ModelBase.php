@@ -10,10 +10,17 @@ class ModelBase
 {
     protected $redis;
 
+    public function __construct()
+    {
+        /*$this->redis = new RedisClient();
+        $this->redis->connect();*/
+    }
+
     protected function initRedis()
     {
-        $this->redis = new RedisClient();
-        $this->redis->connect();
+        $redis = new RedisClient();
+        $redis->connect();
+        return $redis;
     }
 
 }
