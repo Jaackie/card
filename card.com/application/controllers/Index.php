@@ -14,6 +14,6 @@ class IndexController extends Yaf_Controller_Abstract
         echo "</pre>";*/
         $t = new testModel();
 
-        echo $t->pop();
+        echo $t->in();
     }
 }

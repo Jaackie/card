@@ -44,4 +44,9 @@ class testModel extends ModelBase
         return $count--;
     }
 
+    public function in()
+    {
+        return $this->redis->incr('aaa');
+    }
+
 }
