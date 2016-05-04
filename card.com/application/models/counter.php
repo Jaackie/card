@@ -27,6 +27,15 @@ class counterModel extends ModelBase
         $this->_initCount();
     }
 
+    public function getCountByHour()
+    {
+        if ($this->cardName == 'a') {
+            if ($this->time >= strtotime(self::TIME_START) && $this->time <= strtotime(self::TIME_END) - 24 * 3600) {
+//                $count = $this
+            }
+        }
+    }
+
 
     private function _initCount()
     {
@@ -79,6 +88,17 @@ class counterModel extends ModelBase
         }
 
         return true;
+    }
+
+    private function _rateByHour()
+    {
+        $clock = intval(date('H', $this->time));
+        if ($clock >= 0 && $clock <= 5) {
+            return 0.01;
+        } elseif ($clock >= 6 && $clock <= 11) {
+            return ($clock - 5) * 0.02 + 0.01;
+        }
+
     }
 
 } 

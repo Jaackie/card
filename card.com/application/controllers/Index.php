@@ -12,8 +12,9 @@ class IndexController extends Yaf_Controller_Abstract
         echo "<pre>";
         var_dump($arrRes);
         echo "</pre>";*/
-        $t = new testModel();
+        var_dump(date('H', time()));
+        /*$t = new testModel();
 
-        echo $t->in();
+        echo $t->in();*/
     }
 }
