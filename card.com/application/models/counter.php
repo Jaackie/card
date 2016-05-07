@@ -22,18 +22,23 @@ class counterModel extends ModelBase
     public function __construct($cardName, $time)
     {
         $this->cardName = cardModel::checkName($cardName);
-        $this->time = $time;
+        if ($this->checkTime($time)) {
+            $this->time = $time;
+        } else {
+            throw new Exception('Time error');
+        }
         $this->redis = $this->initRedis();
         $this->_initCount();
     }
 
+    public static function getInstance($cardName, $time)
+    {
+        return new self($cardName, $time);
+    }
+
     public function getCountByHour()
     {
-        if ($this->cardName == 'a') {
-            if ($this->time >= strtotime(self::TIME_START) && $this->time <= strtotime(self::TIME_END) - 24 * 3600) {
-//                $count = $this
-            }
-        }
+        return round($this->_getCountByDay() * $this->_weightByHour());
     }
 
 
@@ -79,26 +84,76 @@ class counterModel extends ModelBase
         $this->redis->hset(self::REDIS_KEY_USED, $this->cardName, $this->count_used);
     }
 
-    public function checkTime()
+    public function checkTime($time = 0)
     {
+        if (!$time) {
+            $time = $this->time;
+        }
         $start = strtotime(self::TIME_START);
         $end = strtotime(self::TIME_END);
-        if ($this->time < $start || $this->time > $end) {
+        if ($time < $start || $time > $end) {
             return false;
         }
 
         return true;
     }
 
-    private function _rateByHour()
+    private function _getCountByDay()
+    {
+        $day = intval(date('d', $this->time));
+        if ($this->cardName == 'a') {
+            if ($day < 10) {
+                return $this->count_total * 0.05;
+            } else {
+                return $this->count_total * 0.55;
+            }
+        } else {
+            return $this->count_total * 0.1;
+        }
+    }
+
+    private function _weightByHour()
     {
         $clock = intval(date('H', $this->time));
-        if ($clock >= 0 && $clock <= 5) {
-            return 0.01;
-        } elseif ($clock >= 6 && $clock <= 11) {
-            return ($clock - 5) * 0.02 + 0.01;
+
+        $weight_arr = $this->_weight();
+
+        $total = 0;
+        foreach ($weight_arr as $weight) {
+            $total += $weight;
         }
 
+        return $weight_arr[$clock] / $total;
+    }
+
+    private function _weight()
+    {
+        return [
+            '0' => 0.4,
+            '1' => 0.2,
+            '2' => 0.1,
+            '3' => 0.1,
+            '4' => 0.1,
+            '5' => 0.1,
+            '6' => 0.3,
+            '7' => 1,
+            '8' => 2.2,
+            '9' => 3.3,
+            '10' => 4,
+            '11' => 4.4,
+            '12' => 4.8,
+            '13' => 4.7,
+            '14' => 4.5,
+            '15' => 4.4,
+            '16' => 4.7,
+            '17' => 5,
+            '18' => 4.8,
+            '19' => 4.9,
+            '20' => 4.1,
+            '21' => 3.6,
+            '22' => 1.5,
+            '23' => 0.7,
+        ];
     }
 
 } 
